@@ -318,7 +318,7 @@ class MenuActionHandler(idaapi.action_handler_t):
         return idaapi.AST_ENABLE_ALWAYS
 
 class ConstLoaderPlugin(idaapi.plugin_t, ida_kernwin.UI_Hooks):
-    flags = idaapi.PLUGIN_PROC
+    flags = idaapi.PLUGIN_PROC | idaapi.PLUGIN_HIDE
     comment = "Fold constant loads from read-only data into microcode."
     help = "Toggle microcode constant-load folding."
     wanted_name = "Const Loader"
