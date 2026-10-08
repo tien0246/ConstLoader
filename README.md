@@ -1,38 +1,67 @@
 # ConstLoader
 
-ConstLoader is a plugin helper that folds constant memory reads so your pseudocode becomes readable faster. It targets obfuscation patterns where values are fetched from tables or globals and then combined into opaque expressions.
+ConstLoader is an IDAPython plugin that folds constant-address memory reads in Hex-Rays microcode. It helps expose expressions hidden behind values loaded from tables or global data, a pattern often used by obfuscated binaries.
+
+The optimizer changes decompiler microcode; it does not patch the input binary or IDB bytes.
 
 ## Requirements
-- IDA Pro (I tested on version 9.3)
+
+- IDA Pro 9.3 with the Hex-Rays decompiler (the version tested by the author)
+- No third-party Python packages
 
 ## Install
-1. Copy `ConstLoader.py` into your IDA plugins folder:
-   - macOS: `~/.idapro/plugins/`
-   - Windows: `%APPDATA%\Hex-Rays\IDA Pro\plugins\`
-2. Restart IDA
 
-## Usage
-Open: `Edit → Plugins → Const Loader`
+### IDA Plugin Manager
 
-Available actions:
-- **Enable / Disable** — turn the optimizer on or off
-- **Enable Debug** — show folding logs in the output window
-- **Skip ReadOnly Check** — allow folding even if data is writable
-- **Maturity** — choose the target microcode stage (MMAT_GENERATED, PREOPT, LOCOPT, CALLS, GLBOPT1)
+After the plugin is indexed in the community repository, install it with:
 
-You can also right‑click in Disasm or Pseudocode to access the same actions.
+```sh
+hcli plugin install const-loader
+```
 
-## Notes
-- If a location is written **before** the read in the same function, the fold uses that written value.
-- If a write happens **after** the read, the fold uses the current IDB value.
-- When accuracy matters, keep **Skip ReadOnly Check** disabled.
+### Manual
 
-## Example (Flare‑On 12 — Challenge 7)
+Copy `ConstLoader.py` and `ida-plugin.json` into a `const-loader` folder under IDA's plugins directory, then restart IDA.
+
+- macOS/Linux: `$IDAUSR/plugins/const-loader/` (commonly `~/.idapro/plugins/const-loader/`)
+- Windows: `%APPDATA%\Hex-Rays\IDA Pro\plugins\const-loader\`
+
+## Use
+
+1. Open a database and wait for auto-analysis to finish.
+2. Choose **Edit → Plugins → Const Loader → Enable**. Choose **Disable** to remove the optimizer.
+3. Decompile or refresh a function to see the selected microcode maturity stage take effect.
+
+The same controls are available from the right-click menus in disassembly and pseudocode views.
+
+### Options
+
+- **Enable Debug / Disable Debug** toggles fold messages in IDA's Output window.
+- **Skip ReadOnly Check** bypasses the plugin's write-xref guard. Leave this off unless you know the target data is stable; enabling it can fold a value that changes at runtime.
+- **Maturity** selects when the optimizer runs. The default is `MMAT_GENERATED`; other choices are `MMAT_PREOPTIMIZED`, `MMAT_LOCOPT`, `MMAT_CALLS`, and `MMAT_GLBOPT1`.
+
+## Behavior and limitations
+
+ConstLoader resolves supported constant addresses, reads the corresponding value from the IDB, and replaces eligible microcode memory reads with constants. For data with known write xrefs, it uses a limited scan of stores in the current function. It is not a general path-sensitive memory analysis: values that depend on complex control flow, indirect writes, or runtime state may be skipped or may not be represented by the current IDB contents.
+
+The default guard uses IDA's available xrefs; it does not prove that a location is immutable. Review results when analyzing writable or self-modifying data.
+
+## Example
+
+The screenshots below show a sample function before and after ConstLoader is enabled.
 
 ### Before
 
-![Before](./img/before.png)
+![Pseudocode before ConstLoader](./img/before.png)
 
 ### After
 
-![After](./img/after.png)
+![Pseudocode after ConstLoader](./img/after.png)
+
+## Credits
+
+Created by [tien026](https://github.com/tien0246) (doantien541@gmail.com).
+
+## License
+
+[MIT](./LICENSE)

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://hcli.docs.hex-rays.com/schemas/ida-plugin.json",
+  "IDAMetadataDescriptorVersion": 1,
+  "plugin": {
+    "name": "const-loader",
+    "version": "0.1.0",
+    "entryPoint": "ConstLoader.py",
+    "description": "Fold constant-address memory reads in Hex-Rays microcode to expose values hidden by obfuscation.",
+    "urls": {
+      "repository": "https://github.com/tien0246/ConstLoader"
+    },
+    "authors": [
+      {
+        "name": "tien026",
+        "email": "doantien541@gmail.com"
+      }
+    ],
+    "license": "MIT",
+    "idaVersions": [
+      "9.3"
+    ],
+    "categories": [
+      "decompilation",
+      "deobfuscation"
+    ],
+    "keywords": [
+      "constant-folding",
+      "microcode",
+      "Hex-Rays",
+      "obfuscation",
+      "memory-loads"
+    ]
+  }
+}
